@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkloom AI Studio — Intelligent Brand-Governance Co-Pilot | Team DejaVu (Round 2 Build)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            ink: {
+              50: '#f4f5fa',
+              100: '#e8eaf5',
+              200: '#cfd4eb',
+              500: '#4f46e5',
+              600: '#3b3878',
+              700: '#2B2F55',
+              800: '#1e213d',
+              900: '#121426'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      overflow-x: hidden;
+    }
+    .flag-highlight {
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 1px 4px;
+      margin: 0 1px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      display: inline;
+    }
+    .flag-highlight:hover {
+      filter: brightness(0.93);
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.35);
+    }
+    .flag-tone {
+      background-color: #EDE9FE;
+      color: #5B21B6;
+      border-bottom: 2px solid #7C3AED;
+    }
+    .flag-facts {
+      background-color: #FEF3C7;
+      color: #92400E;
+      border-bottom: 2px solid #D97706;
+    }
+    .flag-visual {
+      background-color: #FCE7F3;
+      color: #9D174D;
+      border-bottom: 2px solid #DB2777;
+    }
+    .flag-accessibility {
+      background-color: #E0F2FE;
+      color: #075985;
+      border-bottom: 2px solid #0284C7;
+    }
+    .flag-legal {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      border-bottom: 2px solid #DC2626;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 3px;
+    }
+    @keyframes pulseSubtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    .animate-pulse-subtle {
+      animation: pulseSubtle 1.4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+
+  <!-- Top Navigation & Persona Bar -->
+  <header class="bg-[#2B2F55] text-white border-b border-indigo-950 sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center font-extrabold text-lg shadow-inner border border-white/20">
+          IL
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base tracking-tight">Inkloom AI</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-300/30 text-indigo-100">Round 2 Live Build</span>
+            <span class="hidden md:inline-block text-xs text-indigo-200/80">by Team DejaVu</span>
+          </div>
+          <p class="text-[11px] text-indigo-200 leading-tight">Not a blocker. A collaborator. • Multi-Agent Brand Governance Co-Pilot</p>
+        </div>
+      </div>
+
+      <!-- Right Controls: Judge Tour, Live Score, Persona Switcher -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button id="btnStartJudgeTour" type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition shadow-sm flex items-center gap-1.5">
+          <span>▶</span>
+          <span>60s Judge Walkthrough</span>
+        </button>
+
+        <div class="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg border border-white/15">
+          <span class="text-[11px] text-indigo-200">Compliance:</span>
+          <span id="headerScoreBadge" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500 text-slate-950">62%</span>
+          <span id="headerStageBadge" class="text-[11px] font-medium text-indigo-100 border-l border-white/20 pl-2">Stage: AI Checked</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-slate-900/50 px-2.5 py-1 rounded-lg border border-white/15">
+          <label for="personaSelect" class="text-[11px] text-indigo-200 font-medium">Role:</label>
+          <select id="personaSelect" class="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer">
+            <option value="creator" class="text-slate-900">Maya Lin (Creator)</option>
+            <option value="brand" class="text-slate-900">Rohan Mehta (Brand Manager)</option>
+            <option value="legal" class="text-slate-900">Priya Sharma (Legal Counsel)</option>
+            <option value="exec" class="text-slate-900">Arjun Nair (VP Comms / Exec)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Workflow Stage Tabs -->
+    <div class="bg-[#1E213D] border-t border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto custom-scrollbar">
+        <nav class="flex items-center space-x-1 py-1.5" aria-label="Main Workflow Stages">
+          <button type="button" data-tab="studio" class="nav-tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm">
+            <span>1. Studio &amp; Multi-Agent Check</span>
+            <span id="tabFlagCountBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20 text-white">5</span>
+          </button>
+          <button type="button" data-tab="knowledge" class="nav-tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-indigo-200 hover:bg-white/10 hover:text-white">
+            <span>2. Brand Knowledge Base (RAG)</span>
+            <span id="tabRuleCountBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10 text-indigo-200">12 Rules</span>
+          </button>
+          <button type="button" data-tab="approval" class="nav-tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-indigo-200 hover:bg-white/10 hover:text-white">
+            <span>3. Role Sign-Off &amp; Audit Trail</span>
+            <span id="tabAuditCountBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10 text-indigo-200">4 Logs</span>
+          </button>
+          <button type="button" data-tab="analytics" class="nav-tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-indigo-200 hover:bg-white/10 hover:text-white">
+            <span>4. Root-Cause Analytics Loop</span>
+          </button>
+          <button type="button" data-tab="architecture" class="nav-tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-indigo-200 hover:bg-white/10 hover:text-white">
+            <span>5. API Sandbox &amp; Round 2 Spec</span>
+          </button>
+        </nav>
+        <div class="hidden lg:flex items-center gap-2 text-[11px] text-indigo-200 py-1">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Vector Index: Qdrant Hybrid (Isolated Tenant: Acme-IN)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Guided Judge Walkthrough Banner (Dismissible / Interactive) -->
+  <div id="judgeTourBanner" class="bg-gradient-to-r from-indigo-900 via-[#2B2F55] to-slate-900 text-white border-b border-indigo-500/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-bold text-[11px] uppercase">Judge Quick Guide</span>
+        <p id="judgeTourStepText" class="text-xs text-indigo-100">
+          <strong>End-to-End Flow:</strong> (1) Select a preset draft or edit text below → (2) Click <strong>Run Multi-Agent Check</strong> → (3) Click any highlighted flag to inspect handbook page citations &amp; apply <strong>1-Click Smart Rewrites</strong> → (4) Complete <strong>Role Sign-Off</strong> or refine rules in <strong>Analytics</strong>.
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnAutoDemoFix" type="button" class="text-xs font-semibold px-2.5 py-1 rounded bg-indigo-500 hover:bg-indigo-400 text-white transition">
+          ⚡ Auto-Simulate Full Cycle
+        </button>
+        <button id="btnCloseJudgeBanner" type="button" class="text-xs text-indigo-200 hover:text-white px-2 py-1" title="Hide Guide">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5">
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: STUDIO & MULTI-AGENT GOVERNANCE CHECK (STAGES 2, 3, 4)        -->
+    <!-- =================================================================== -->
+    <section id="tab-studio" class="tab-panel space-y-5">
+      
+      <!-- Top 5-Dimension Score Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Overall Score</span>
+            <span id="overallStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          </div>
+          <div class="mt-1 flex items-baseline gap-2">
+            <span id="scoreOverall" class="text-2xl font-extrabold text-slate-900">62%</span>
+            <span id="scoreOverallDelta" class="text-xs font-semibold text-amber-600">Needs Review</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="barOverall" class="bg-indigo-600 h-full transition-all duration-300" style="width: 62%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-violet-700">1. Tone &amp; Voice</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 font-medium">Style Agent</span>
+          </div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="scoreTone" class="text-xl font-bold text-slate-900">68%</span>
+            <span id="countToneFlags" class="text-[11px] text-slate-500">1 flag</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="barTone" class="bg-violet-600 h-full transition-all duration-300" style="width: 68%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-amber-700">2. Facts &amp; Pricing</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">RAG Agent</span>
+          </div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="scoreFacts" class="text-xl font-bold text-slate-900">50%</span>
+            <span id="countFactsFlags" class="text-[11px] text-slate-500">1 flag</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="barFacts" class="bg-amber-500 h-full transition-all duration-300" style="width: 50%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-pink-700">3. Visual Identity</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-pink-50 text-pink-700 font-medium">Visual Agent</span>
+          </div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="scoreVisual" class="text-xl font-bold text-slate-900">65%</span>
+            <span id="countVisualFlags" class="text-[11px] text-slate-500">1 flag</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="barVisual" class="bg-pink-600 h-full transition-all duration-300" style="width: 65%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-sky-700">4. Accessibility</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-medium">WCAG Agent</span>
+          </div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="scoreAccessibility" class="text-xl font-bold text-slate-900">55%</span>
+            <span id="countAccessibilityFlags" class="text-[11px] text-slate-500">1 flag</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="barAccessibility" class="bg-sky-600 h-full transition-all duration-300" style="width: 55%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-red-700">5. Legal Claims</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Policy Agent</span>
+          </div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="scoreLegal" class="text-xl font-bold text-slate-900">70%</span>
+            <span id="countLegalFlags" class="text-[11px] text-slate-500">1 flag</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="barLegal" class="bg-red-600 h-full transition-all duration-300" style="width: 70%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Two-Column Studio Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <!-- LEFT 7 COLS: Multi-Channel Intake, Draft Editor, Visual/Accessibility Inspector -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            
+            <!-- Intake Channel & Preset Selector Bar -->
+            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <label for="scenarioPresetSelect" class="text-xs font-bold text-slate-700">Demo Scenario:</label>
+                <select id="scenarioPresetSelect" class="text-xs font-medium bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="q3_launch">1. Q3 Cloud Launch Blog (Slide 6 Pricing + Tone + Legal)</option>
+                  <option value="fintech_ad">2. Fintech Cashback Social Copy (Regulatory + WCAG Contrast)</option>
+                  <option value="security_deck">3. Enterprise Security Spec (Deprecated Naming + Spec Error)</option>
+                  <option value="clean_pr">4. Compliant Partner Release (Ready for Approval)</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <label for="intakeChannelSelect" class="text-[11px] font-medium text-slate-500">Intake Source:</label>
+                <select id="intakeChannelSelect" class="text-xs font-semibold bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-lg px-2.5 py-1.5 focus:outline-none">
+                  <option value="Web App Studio">Inkloom Web Studio</option>
+                  <option value="WordPress Plugin">WordPress Gutenberg Plugin</option>
+                  <option value="Figma Plugin">Figma Canvas Plugin</option>
+                  <option value="Slack Bot">Slack Bot (/inkloom)</option>
+                  <option value="CI/CD API">REST API Pipeline</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Document Title & Mode Toggle -->
+            <div class="px-4 py-2.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-white">
+              <input id="draftTitleInput" type="text" value="Q3 Acme Cloud Enterprise Tier Launch Announcement" class="text-sm font-bold text-slate-900 bg-transparent border-b border-transparent focus:border-indigo-500 focus:outline-none flex-1 min-w-[220px]" />
+              <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg">
+                <button id="btnModeAnnotated" type="button" class="px-2.5 py-1 rounded text-xs font-semibold bg-white text-indigo-700 shadow-sm transition">
+                  🔍 Annotated Highlights
+                </button>
+                <button id="btnModeEdit" type="button" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+                  ✏️ Edit Raw Draft
+                </button>
+                <button id="btnOpenDiffModal" type="button" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-600 hover:text-indigo-700 transition">
+                  ⇄ Side-by-Side Diff
+                </button>
+              </div>
+            </div>
+
+            <!-- Annotated Highlight Canvas (Default Mode) -->
+            <div id="annotatedEditorPane" class="p-5 min-h-[250px] text-sm leading-relaxed text-slate-800 space-y-3 bg-white">
+              <!-- Populated dynamically by JS -->
+            </div>
+
+            <!-- Raw Textarea Mode (For Custom Editing) -->
+            <div id="rawEditorPane" class="hidden p-4 bg-slate-50">
+              <label for="rawDraftTextarea" class="block text-xs font-semibold text-slate-600 mb-1.5">Edit Content Directly (Click "Run Multi-Agent Check" to re-evaluate):</label>
+              <textarea id="rawDraftTextarea" rows="8" class="w-full p-3 rounded-lg border border-slate-300 text-sm leading-relaxed text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-sans"></textarea>
+            </div>
+
+            <!-- Visual Asset & Accessibility Metadata Bar (Dimensions 3 & 4) -->
+            <div class="bg-slate-50 px-4 py-3.5 border-t border-slate-200 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                  <span>🎨 Visual Identity &amp; WCAG 2.1 Accessibility Inspector</span>
+                </span>
+                <button id="btnAutoFixVisuals" type="button" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline">
+                  Snap Visuals &amp; Alt-Text to Brand Spec
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Banner Color Picker -->
+                <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <div class="text-[11px] font-semibold text-slate-500">Primary Brand Hex</div>
+                    <div id="visualBgHexLabel" class="text-xs font-mono font-bold text-slate-800">#94A3B8</div>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <input id="visualBgColorInput" type="color" value="#94A3B8" class="w-7 h-7 rounded cursor-pointer border border-slate-300" title="Choose Banner Background Hex" />
+                    <input id="visualFgColorInput" type="color" value="#FFFFFF" class="w-7 h-7 rounded cursor-pointer border border-slate-300" title="Choose Text Foreground Hex" />
+                  </div>
+                </div>
+
+                <!-- Live Contrast Ratio Preview -->
+                <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <div class="text-[11px] font-semibold text-slate-500">WCAG 2.1 Contrast</div>
+                    <div class="flex items-center gap-1.5">
+                      <span id="wcagRatioValue" class="text-xs font-mono font-bold text-slate-900">2.56:1</span>
+                      <span id="wcagPassBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">FAIL AA</span>
+                    </div>
+                  </div>
+                  <div id="wcagSampleChip" class="px-2.5 py-1 rounded text-xs font-bold border border-slate-200" style="background-color:#94A3B8; color:#FFFFFF;">
+                    CTA Preview
+                  </div>
+                </div>
+
+                <!-- Alt-Text Inspector -->
+                <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                    <label for="imageAltTextInput" class="text-[11px] font-semibold text-slate-500">Hero Image Alt-Text</label>
+                    <button id="btnGenerateAltText" type="button" class="text-[10px] font-semibold text-indigo-600 hover:underline">✨ AI Generate</button>
+                  </div>
+                  <input id="imageAltTextInput" type="text" placeholder="Missing alt-text..." value="" class="mt-1 text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:border-indigo-500" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Footer: Run Parallel Multi-Agent Check -->
+            <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2 text-xs text-slate-600">
+                <span id="agentStatusIndicator" class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span id="agentExecutionSummary">4 Agents Ready • Hybrid RAG Index (12 clauses active)</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="btnRunGovernanceCheck" type="button" class="px-4 py-2 rounded-lg bg-[#2B2F55] hover:bg-indigo-900 text-white text-xs font-bold shadow transition flex items-center gap-1.5">
+                  <span>⚡ Run Parallel Multi-Agent Check</span>
+                </button>
+                <button id="btnAdvanceToApproval" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition">
+                  <span>Submit to Approval Flow →</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parallel Multi-Agent Execution Trace Card (Stage 3 Telemetry) -->
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Stage 3: Parallel Multi-Agent Evaluation Telemetry</h2>
+                <p class="text-[11px] text-slate-500">Simultaneous execution across Tone, Fact-RAG, Visual/WCAG, and Policy/Legal agents</p>
+              </div>
+              <span id="telemetryLatencyBadge" class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Total Latency: 340ms</span>
+            </div>
+            <div id="agentTelemetryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT 5 COLS: Explainable Flags, Source Attribution & 1-Click Smart Rewrites -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 class="text-sm font-bold text-slate-900">Stage 4: Explainable Flags &amp; Smart Rewrites</h2>
+                <p class="text-[11px] text-slate-500">Every flag cites the exact handbook rule &amp; page number</p>
+              </div>
+              <button id="btnAcceptAllRewrites" type="button" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition">
+                ✨ Accept All Fixes
+              </button>
+            </div>
+
+            <!-- Dimension Filter Pills -->
+            <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto custom-scrollbar bg-white">
+              <button type="button" data-filter="all" class="flag-filter-btn px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-900 text-white">All</button>
+              <button type="button" data-filter="facts" class="flag-filter-btn px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 hover:bg-amber-100">Facts &amp; RAG</button>
+              <button type="button" data-filter="tone" class="flag-filter-btn px-2.5 py-1 rounded-full text-[11px] font-semibold bg-violet-50 text-violet-800 hover:bg-violet-100">Tone</button>
+              <button type="button" data-filter="legal" class="flag-filter-btn px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-50 text-red-800 hover:bg-red-100">Legal</button>
+              <button type="button" data-filter="visual" class="flag-filter-btn px-2.5 py-1 rounded-full text-[11px] font-semibold bg-pink-50 text-pink-800 hover:bg-pink-100">Visual</button>
+              <button type="button" data-filter="accessibility" class="flag-filter-btn px-2.5 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800 hover:bg-sky-100">WCAG</button>
+            </div>
+
+            <!-- Flags List Container -->
+            <div id="flagsListContainer" class="p-4 space-y-3 max-h-[620px] overflow-y-auto custom-scrollbar">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: BRAND KNOWLEDGE BASE & VECTOR INDEX (STAGE 1)                -->
+    <!-- =================================================================== -->
+    <section id="tab-knowledge" class="tab-panel hidden space-y-5">
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Stage 1 • Semantic Source of Truth</span>
+            <h1 class="text-lg font-extrabold text-slate-900">Enterprise Brand Knowledge Base &amp; Vector Index</h1>
+            <p class="text-xs text-slate-600 mt-0.5">Parsed PDFs, pricing fact-sheets, glossaries, and WCAG color tokens embedded into tenant-isolated vector chunks.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-right">
+              <div class="text-[10px] font-semibold uppercase text-slate-400">Indexed Documents</div>
+              <div class="text-sm font-extrabold text-slate-900">4 Handbooks • <span id="kbTotalRulesCount">12</span> Active Clauses</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Semantic RAG Retrieval Tester + Custom Rule Ingestion -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
+          
+          <!-- Left 7 Cols: Active Indexed Rules & Semantic Search -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="kbSearchInput" type="text" placeholder="Search vector index by keyword, pricing tier, PDF source, or rule..." class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <select id="kbDimensionFilter" class="text-xs border border-slate-300 rounded-lg px-2.5 py-2 bg-white">
+                <option value="all">All Dimensions</option>
+                <option value="facts">Facts &amp; Pricing</option>
+                <option value="tone">Tone &amp; Style</option>
+                <option value="legal">Legal &amp; Policy</option>
+                <option value="visual">Visual Identity</option>
+                <option value="accessibility">Accessibility</option>
+              </select>
+            </div>
+
+            <div id="kbRulesList" class="space-y-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+              <!-- Populated dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Right 5 Cols: Add Custom Brand Guideline / Pricing Rule -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-bold text-slate-900">+ Ingest New Guideline / Fact Sheet Rule</h2>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">Live Vector Chunk</span>
+              </div>
+              <p class="text-xs text-slate-600">Add a custom rule to the Knowledge Base and test it immediately in the Studio editor.</p>
+
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <label for="newRuleDimension" class="block font-semibold text-slate-700 mb-1">Governance Dimension</label>
+                  <select id="newRuleDimension" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white">
+                    <option value="facts">Facts &amp; Pricing (RAG Fact-Check Agent)</option>
+                    <option value="tone">Tone &amp; Terminology (Tone &amp; Style Agent)</option>
+                    <option value="legal">Legal &amp; Regulatory Claims (Policy Agent)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="newRuleTrigger" class="block font-semibold text-slate-700 mb-1">Prohibited / Outdated Phrase or Claim</label>
+                  <input id="newRuleTrigger" type="text" placeholder="e.g., ₹2,999 or 'unlimited free storage'" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white" />
+                </div>
+
+                <div>
+                  <label for="newRuleReplacement" class="block font-semibold text-slate-700 mb-1">Approved Smart Rewrite Replacement</label>
+                  <input id="newRuleReplacement" type="text" placeholder="e.g., ₹4,999 or 'up to 5 TB enterprise cloud storage'" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label for="newRuleSourceDoc" class="block font-semibold text-slate-700 mb-1">Source Document PDF</label>
+                    <input id="newRuleSourceDoc" type="text" value="Q4-Brand-Addendum.pdf" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white" />
+                  </div>
+                  <div>
+                    <label for="newRuleSourcePage" class="block font-semibold text-slate-700 mb-1">Page &amp; Section</label>
+                    <input id="newRuleSourcePage" type="text" value="Page 2, Sec 1.4" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white" />
+                  </div>
+                </div>
+
+                <div>
+                  <label for="newRuleExplanation" class="block font-semibold text-slate-700 mb-1">Handbook Rule Citation / Explanation</label>
+                  <textarea id="newRuleExplanation" rows="2" placeholder="Explain why this phrase violates the brand handbook..." class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white"></textarea>
+                </div>
+
+                <button id="btnAddCustomRule" type="button" class="w-full py-2 rounded-lg bg-[#2B2F55] hover:bg-indigo-900 text-white font-bold transition shadow-sm">
+                  Embed &amp; Index Rule into Knowledge Base
+                </button>
+              </div>
+            </div>
+
+            <!-- Approved Brand Color Tokens Reference -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 space-y-2.5">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Approved Brand Palette Tokens (WCAG AA Verified)</h3>
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                <div class="p-2 rounded border border-slate-200 flex items-center gap-2">
+                  <span class="w-5 h-5 rounded bg-[#2B2F55] inline-block border border-slate-300"></span>
+                  <div>
+                    <div class="font-bold text-slate-800">Ink Navy</div>
+                    <div class="font-mono text-[10px] text-slate-500">#2B2F55</div>
+                  </div>
+                </div>
+                <div class="p-2 rounded border border-slate-200 flex items-center gap-2">
+                  <span class="w-5 h-5 rounded bg-[#4F46E5] inline-block border border-slate-300"></span>
+                  <div>
+                    <div class="font-bold text-slate-800">Indigo Core</div>
+                    <div class="font-mono text-[10px] text-slate-500">#4F46E5</div>
+                  </div>
+                </div>
+                <div class="p-2 rounded border border-slate-200 flex items-center gap-2">
+                  <span class="w-5 h-5 rounded bg-[#0F172A] inline-block border border-slate-300"></span>
+                  <div>
+                    <div class="font-bold text-slate-800">Slate Ink</div>
+                    <div class="font-mono text-[10px] text-slate-500">#0F172A</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: ROLE-BASED APPROVAL & PERMANENT AUDIT TRAIL (STAGE 5)        -->
+    <!-- =================================================================== -->
+    <section id="tab-approval" class="tab-panel hidden space-y-5">
+      
+      <!-- Configurable Sign-Off Pipeline Stepper -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Stage 5 • Role-Based Access Control (RBAC)</span>
+            <h1 class="text-lg font-extrabold text-slate-900">Collaborative Sign-Off Chain &amp; Permanent Audit Trail</h1>
+            <p class="text-xs text-slate-600">High-risk claims route through Brand and Legal review before publication. Switch your active role in the top bar to test each sign-off gate.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnExportAuditJson" type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition">
+              ⬇ Export Immutable Audit Log (JSON)
+            </button>
+          </div>
+        </div>
+
+        <!-- 5-Step Sign-Off Visual Chain -->
+        <div id="approvalStepperContainer" class="grid grid-cols-1 sm:grid-cols-5 gap-2.5 pt-2">
+          <!-- Populated dynamically by JS -->
+        </div>
+
+        <!-- Role-Gated Action Bar -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="text-xs font-bold text-slate-800">
+              Active Reviewer Persona: <span id="approvalActivePersonaLabel" class="text-indigo-700">Maya Lin (Creator)</span>
+            </div>
+            <p id="approvalGateHint" class="text-xs text-slate-600 mt-0.5">
+              Resolve or override critical flags to advance the draft through Brand Manager and Legal Counsel sign-off.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btnWorkflowStepBack" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700 transition">
+              ← Return for Revisions
+            </button>
+            <button id="btnWorkflowStepForward" type="button" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition">
+              Advance Workflow Stage →
+            </button>
+            <button id="btnWorkflowFastApprove" type="button" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition">
+              ✓ Complete Full Sign-Off
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Threaded Comments & Permanent Audit Trail Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left 5 Cols: Threaded Review Comments -->
+        <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900">Threaded Review &amp; Debate</h2>
+            <p class="text-xs text-slate-500">Creators, Brand Managers, and Legal Counsel collaborate directly on flagged clauses.</p>
+
+            <div id="commentsListContainer" class="space-y-3 mt-3 max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="border-t border-slate-200 pt-3 space-y-2">
+            <label for="newCommentInput" class="block text-xs font-semibold text-slate-700">Add Review Comment (as active persona):</label>
+            <div class="flex gap-2">
+              <input id="newCommentInput" type="text" placeholder="Type comment or sign-off note..." class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button id="btnPostComment" type="button" class="px-3.5 py-2 rounded-lg bg-[#2B2F55] hover:bg-indigo-900 text-white text-xs font-bold transition">
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 7 Cols: Permanent Cryptographic-Style Audit Trail -->
+        <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Permanent Compliance Audit Trail</h2>
+              <p class="text-xs text-slate-500">Every AI evaluation, 1-click rewrite, human override, and role sign-off is logged with a verification hash.</p>
+            </div>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">SHA-256 Verified</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 bg-slate-50">
+                  <th class="py-2 px-2.5 font-semibold">Timestamp</th>
+                  <th class="py-2 px-2.5 font-semibold">Actor &amp; Role</th>
+                  <th class="py-2 px-2.5 font-semibold">Event / Action</th>
+                  <th class="py-2 px-2.5 font-semibold">Audit Hash</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 4: GOVERNANCE ANALYTICS & GUIDELINE REFINEMENT LOOP (STAGE 6)   -->
+    <!-- =================================================================== -->
+    <section id="tab-analytics" class="tab-panel hidden space-y-5">
+      
+      <!-- Top Analytics KPIs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-500">Drafts Evaluated (30d)</span>
+          <div class="text-2xl font-extrabold text-slate-900 mt-1" id="kpiTotalDrafts">1,428</div>
+          <span class="text-[11px] font-semibold text-emerald-600">↑ 94.2% resolved pre-review</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-500">1-Click Rewrite Acceptance</span>
+          <div class="text-2xl font-extrabold text-indigo-700 mt-1" id="kpiRewriteRate">88.6%</div>
+          <span class="text-[11px] text-slate-500">Preserves creator voice &amp; intent</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-500">Avg Review Cycle Reduction</span>
+          <div class="text-2xl font-extrabold text-emerald-700 mt-1">4.2 hrs → 18 mins</div>
+          <span class="text-[11px] text-slate-500">92.8% faster time-to-publish</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-500">Guideline Ambiguities Fixed</span>
+          <div class="text-2xl font-extrabold text-amber-600 mt-1" id="kpiRefinedCount">3 Active</div>
+          <span class="text-[11px] text-slate-500">Closed-loop source refinement</span>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <h2 class="text-sm font-bold text-slate-900">Recurring Flags by Dimension &amp; Team (Root-Cause View)</h2>
+          <p class="text-xs text-slate-500 mb-3">Surfaces systemic misunderstandings across creative, growth, and partner teams</p>
+          <div class="relative h-64">
+            <canvas id="chartViolationsByTeam"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <h2 class="text-sm font-bold text-slate-900">First-Pass Compliance Uplift After Guideline Refinement</h2>
+          <p class="text-xs text-slate-500 mb-3">Impact of updating ambiguous handbook rules at the source (Weeks 1–6)</p>
+          <div class="relative h-64">
+            <canvas id="chartComplianceTrend"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Root-Cause Insights & 1-Click Guideline Refinement Loop (Slide 8 Blueprint) -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Stage 6 • Closed-Loop Governance Improvement</span>
+            <h2 class="text-base font-extrabold text-slate-900">Root-Cause Insights: Fix Ambiguous Guidelines at the Source</h2>
+            <p class="text-xs text-slate-600">When teams repeatedly trigger the same flag or override an AI suggestion, Inkloom AI recommends a concrete handbook update.</p>
+          </div>
+        </div>
+
+        <div id="rootCauseInsightsList" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 5: ARCHITECTURE, LIVE API SANDBOX & ROUND 2 SUBMISSION SPEC     -->
+    <!-- =================================================================== -->
+    <section id="tab-architecture" class="tab-panel hidden space-y-5">
+      
+      <!-- Interactive Multi-Channel API & Webhook Simulator -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Technical Depth &amp; Integrations</span>
+            <h1 class="text-lg font-extrabold text-slate-900">Multi-Channel Intake API &amp; LangGraph Orchestration Sandbox</h1>
+            <p class="text-xs text-slate-600">Test the live JSON payload structure used by our WordPress, Figma, Slack, and FastAPI endpoints.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="apiEndpointSelect" class="text-xs font-mono border border-slate-300 rounded-lg px-3 py-1.5 bg-slate-50">
+              <option value="evaluate">POST /api/v2/governance/evaluate (Multi-Agent Check)</option>
+              <option value="ingest">POST /api/v2/knowledge/ingest (Vector Chunk Embedding)</option>
+              <option value="approve">POST /api/v2/workflow/signoff (RBAC Audit Transition)</option>
+            </select>
+            <button id="btnSendApiRequest" type="button" class="px-3.5 py-1.5 rounded-lg bg-[#2B2F55] hover:bg-indigo-900 text-white text-xs font-bold transition">
+              ▶ Execute API Call
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <div class="text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span>Request Payload (JSON)</span>
+              <span class="text-[11px] font-mono text-slate-400">Content-Type: application/json</span>
+            </div>
+            <pre id="apiRequestPre" class="bg-slate-900 text-indigo-200 p-3.5 rounded-xl text-[11px] font-mono overflow-x-auto max-h-64 custom-scrollbar"></pre>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span>Response Payload (200 OK • Live State)</span>
+              <span id="apiResponseTiming" class="text-[11px] font-mono text-emerald-600">312ms • 4 Agents Executed</span>
+            </div>
+            <pre id="apiResponsePre" class="bg-slate-900 text-emerald-300 p-3.5 rounded-xl text-[11px] font-mono overflow-x-auto max-h-64 custom-scrollbar"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Round 2 Submission Requirement Breakdown Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        
+        <!-- Changes from Round 1 Plan -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600">Round 1 → Round 2 Engineering Evolution</span>
+          <h2 class="text-base font-extrabold text-slate-900">Explanation of Changes Made to the Original Plan</h2>
+          <ul class="space-y-2.5 text-xs text-slate-700 leading-relaxed">
+            <li class="flex gap-2">
+              <span class="font-bold text-indigo-600">1.</span>
+              <span><strong>Zero-Auth Judge Persona Switcher vs. Mandatory Enterprise SSO:</strong> Round 1 specified strict login gates. So Round 2 judges can evaluate every role-based workflow without credentials, we built an instant <strong>4-Role Persona Switcher</strong> (Creator, Brand Manager, Legal Counsel, Executive VP) pre-populated with Acme Cloud India's tenant data.</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="font-bold text-indigo-600">2.</span>
+              <span><strong>Hybrid Deterministic + Vector RAG Engine for Zero-Failure Reliability:</strong> Live LLM API calls during high-concurrency hackathon judging risk rate limits or quota timeouts. We engineered a <strong>Hybrid Evaluation Engine</strong> combining deterministic semantic chunk matching, exact W3C WCAG luminance math, and FastAPI async agent orchestration for guaranteed sub-second responses.</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="font-bold text-indigo-600">3.</span>
+              <span><strong>Embedded Multi-Channel Webhook Simulator:</strong> Rather than requiring judges to install separate Figma or WordPress plugins locally, we integrated a live multi-channel intake simulator directly inside the Studio.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Three Major Round 3 Improvements -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600">Round 3 Roadmap (15 Pts Criteria)</span>
+          <h2 class="text-base font-extrabold text-slate-900">Three Major Planned Improvements for Round 3</h2>
+          <ul class="space-y-2.5 text-xs text-slate-700 leading-relaxed">
+            <li class="flex gap-2">
+              <span class="font-bold text-emerald-600">1.</span>
+              <span><strong>Vision-Language Multimodal Spatial &amp; Video Frame Inspector:</strong> Full VLM + OpenCV bounding-box pipeline to verify logo clear-space geometry, detect unauthorized watermarks, and compute pixel-level OCR text contrast over complex photographic banners and video frames.</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="font-bold text-emerald-600">2.</span>
+              <span><strong>GraphRAG Cross-Document Policy Conflict Detector &amp; Auto-Synthesizer:</strong> Automatically detects contradictions when a newly uploaded regional campaign PDF conflicts with existing pricing matrices or legal disclosures *before* creators use them.</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="font-bold text-emerald-600">3.</span>
+              <span><strong>Native CRDT Real-Time Collaborative Plugins (Figma, WordPress &amp; CI/CD Gateways):</strong> Installable Figma Canvas &amp; WordPress Gutenberg plugins with WebSocket (`Yjs` CRDT) co-editing and automated GitHub/Contentful pre-publish webhook gates.</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SIDE-BY-SIDE DIFF MODAL -->
+  <div id="diffModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-[#2B2F55] text-white px-5 py-3.5 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold">Side-by-Side Semantic Diff Viewer</h3>
+          <p class="text-[11px] text-indigo-200">Compare current draft against Inkloom AI's context-preserving smart rewrites</p>
+        </div>
+        <button id="btnCloseDiffModal" type="button" class="text-indigo-200 hover:text-white text-sm font-bold px-2 py-1">✕</button>
+      </div>
+      <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div class="p-4 rounded-xl bg-red-50/60 border border-red-200">
+          <div class="text-xs font-bold uppercase tracking-wider text-red-800 mb-2">Current Draft (With Active Flags)</div>
+          <div id="diffCurrentText" class="text-xs leading-relaxed text-slate-800 space-y-2"></div>
+        </div>
+        <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-2">Inkloom Co-Pilot Compliant Preview</div>
+          <div id="diffCompliantText" class="text-xs leading-relaxed text-slate-800 space-y-2"></div>
+        </div>
+      </div>
+      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex items-center justify-end gap-2">
+        <button id="btnApplyDiffAll" type="button" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
+          ✨ Apply All Smart Rewrites Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERRIDE REASON MODAL (Human-in-the-Loop Supremacy) -->
+  <div id="overrideModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold">Human-in-the-Loop Override</h3>
+          <p class="text-[11px] text-slate-300">Creators retain final control. Log your justification for the audit trail.</p>
+        </div>
+        <button id="btnCloseOverrideModal" type="button" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <div class="p-5 space-y-3 text-xs">
+        <div id="overrideFlagSummary" class="p-2.5 rounded-lg bg-slate-100 text-slate-700 font-medium"></div>
+        <div>
+          <label for="overrideReasonInput" class="block font-semibold text-slate-700 mb-1">Override Justification (Required for Compliance Audit Log):</label>
+          <textarea id="overrideReasonInput" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">Approved promotional exception for enterprise partner co-marketing campaign (Ref: Campaign-Brief-104).</textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="btnCancelOverride" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 font-semibold">Cancel</button>
+          <button id="btnConfirmOverride" type="button" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Confirm Human Override</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- APPLICATION STATE & MULTI-AGENT ENGINE -->
+  <script>
+    (function() {
+      // 1. Enterprise Knowledge Base Rules (Vector Chunks with exact Handbook Citations)
+      const initialKnowledgeBase = [
+        {
+          id: 'rule-facts-1',
+          dimension: 'facts',
+          agent: 'Fact-Checking & RAG Agent',
+          severity: 'Critical',
+          trigger: '₹3,999',
+          replacement: '₹4,999',
+          sourceDoc: 'Q3-Pricing-Matrix.pdf',
+          sourcePage: 'Page 4, Table 2.1',
+          similarity: '98.4%',
+          explanation: 'Outdated pricing tier. According to Q3-Pricing-Matrix.pdf (Page 4), the Acme Cloud Enterprise starting tier is ₹4,999/month, not ₹3,999/month.'
+        },
+        {
+          id: 'rule-tone-1',
+          dimension: 'tone',
+          agent: 'Tone & Style Agent',
+          severity: 'Warning',
+          trigger: 'synergistic paradigm-shifting disruptor',
+          replacement: 'collaborative enterprise cloud platform',
+          sourceDoc: 'Brand-Voice-Handbook-v4.2.pdf',
+          sourcePage: 'Page 12, Sec 3.2',
+          similarity: '95.1%',
+          explanation: 'Prohibited buzzwords. Brand Voice Handbook (Page 12) prohibits empty hype terms ("synergistic", "paradigm-shifting", "disruptor") in favor of clear, concrete value statements.'
+        },
+        {
+          id: 'rule-legal-1',
+          dimension: 'legal',
+          agent: 'Policy & Compliance Agent',
+          severity: 'Critical',
+          trigger: '100% guaranteed zero downtime forever',
+          replacement: '99.99% financially backed uptime SLA',
+          sourceDoc: 'Regulatory-Claims-Policy-2026.pdf',
+          sourcePage: 'Page 7, Clause 4.1',
+          similarity: '97.8%',
+          explanation: 'Unsupported absolute guarantee. Legal Policy (Page 7) forbids absolute "100% zero downtime" claims due to statutory liability; always cite the contractual 99.99% SLA.'
+        },
+        {
+          id: 'rule-facts-2',
+          dimension: 'facts',
+          agent: 'Fact-Checking & RAG Agent',
+          severity: 'Warning',
+          trigger: 'AES-128 bit encryption',
+          replacement: 'AES-256 encryption at rest and TLS 1.3 in transit',
+          sourceDoc: 'Security-Architecture-Spec.pdf',
+          sourcePage: 'Page 3, Sec 1.1',
+          similarity: '96.2%',
+          explanation: 'Inaccurate technical specification. All Acme Cloud data layers enforce AES-256 encryption at rest and TLS 1.3 in transit.'
+        },
+        {
+          id: 'rule-tone-2',
+          dimension: 'tone',
+          agent: 'Tone & Style Agent',
+          severity: 'Advisory',
+          trigger: 'Inkloom Legacy Server',
+          replacement: 'Acme Cloud Core Engine',
+          sourceDoc: 'Approved-Product-Glossary.pdf',
+          sourcePage: 'Page 2, Sec A',
+          similarity: '94.0%',
+          explanation: 'Deprecated product nomenclature. "Legacy Server" was retired in Q1; use "Acme Cloud Core Engine".'
+        },
+        {
+          id: 'rule-legal-2',
+          dimension: 'legal',
+          agent: 'Policy & Compliance Agent',
+          severity: 'Critical',
+          trigger: 'guaranteed 25% instant return with zero risk',
+          replacement: 'up to 5% promotional cashback subject to merchant terms',
+          sourceDoc: 'Regulatory-Claims-Policy-2026.pdf',
+          sourcePage: 'Page 9, ASCI/FinTech Clause 6.3',
+          similarity: '99.1%',
+          explanation: 'High-risk financial promise. ASCI & RBI promotional guidelines prohibit "zero risk" or guaranteed return claims without mandatory risk disclaimers.'
+        },
+        {
+          id: 'rule-tone-3',
+          dimension: 'tone',
+          agent: 'Tone & Style Agent',
+          severity: 'Warning',
+          trigger: 'crush and humiliate your slow competitors',
+          replacement: 'help your team ship campaigns 4x faster with confidence',
+          sourceDoc: 'Brand-Voice-Handbook-v4.2.pdf',
+          sourcePage: 'Page 8, Voice Persona',
+          similarity: '93.7%',
+          explanation: 'Violates "Collaborative & Empathetic" brand persona. Avoid aggressive combative phrasing toward competitors.'
+        }
+      ];
+
+      // 2. Pre-loaded Realistic Demo Scenarios for Judges
+      const demoScenarios = {
+        q3_launch: {
+          title: 'Q3 Acme Cloud Enterprise Tier Launch Announcement',
+          channel: 'Web App Studio',
+          bgHex: '#94A3B8',
+          fgHex: '#FFFFFF',
+          altText: '',
+          text: 'Introducing the new Acme Cloud Enterprise release—a synergistic paradigm-shifting disruptor built for high-velocity engineering teams.\n\nOrganizations can onboard today starting at just ₹3,999 per month with full multi-region workspace support.\n\nOur infrastructure delivers 100% guaranteed zero downtime forever, backed by AES-128 bit encryption across every tenant node.'
+        },
+        fintech_ad: {
+          title: 'Festive Season Instant Rewards Social Campaign',
+          channel: 'Figma Plugin',
+          bgHex: '#F59E0B',
+          fgHex: '#FFFFFF',
+          altText: '',
+          text: 'Switch to Acme Pay Corporate Cards this festive quarter and unlock a guaranteed 25% instant return with zero risk on every software subscription.\n\nBuilt on our Inkloom Legacy Server architecture, Acme Pay helps you crush and humiliate your slow competitors while scaling globally.'
+        },
+        security_deck: {
+          title: 'Enterprise Trust & Data Governance Whitepaper Excerpt',
+          channel: 'WordPress Plugin',
+          bgHex: '#2B2F55',
+          fgHex: '#FFFFFF',
+          altText: 'Architecture diagram of Acme Cloud security layers',
+          text: 'Acme Cloud protects enterprise intellectual property using AES-128 bit encryption and strict role-based tenant isolation.\n\nCustomers migrating from Inkloom Legacy Server can activate the new tier starting at ₹3,999 per month.'
+        },
+        clean_pr: {
+          title: 'Q3 Enterprise Partner Ecosystem Expansion Release',
+          channel: 'Web App Studio',
+          bgHex: '#2B2F55',
+          fgHex: '#FFFFFF',
+          altText: 'Acme Cloud partner ecosystem dashboard showing five compliance dimensions',
+          text: 'Acme Cloud today announced expanded multi-agent governance capabilities within the collaborative enterprise cloud platform.\n\nEnterprise teams can deploy dedicated workspaces starting at ₹4,999 per month, backed by our 99.99% financially backed uptime SLA and AES-256 encryption at rest and TLS 1.3 in transit.'
+        }
+      };
+
+      // 3. Central Reactive State
+      const state = {
+        activeTab: 'studio',
+        editMode: 'annotated', // 'annotated' | 'raw'
+        activePersona: 'creator',
+        personaNames: {
+          creator: { name: 'Maya Lin', role: 'Content Creator' },
+          brand: { name: 'Rohan Mehta', role: 'Brand Manager' },
+          legal: { name: 'Priya Sharma', role: 'Legal Counsel' },
+          exec: { name: 'Arjun Nair', role: 'VP Communications' }
+        },
+        currentScenarioKey: 'q3_launch',
+        draftTitle: demoScenarios.q3_launch.title,
+        intakeChannel: demoScenarios.q3_launch.channel,
+        draftText: demoScenarios.q3_launch.text,
+        visualBgHex: demoScenarios.q3_launch.bgHex,
+        visualFgHex: demoScenarios.q3_launch.fgHex,
+        imageAltText: demoScenarios.q3_launch.altText,
+        knowledgeBase: [...initialKnowledgeBase],
+        activeFlags: [],
+        overriddenRuleIds: {},
+        flagFilter: 'all',
+        pendingOverrideRuleId: null,
+        workflowStageIndex: 1, // 0: Draft, 1: AI Checked, 2: Brand Review, 3: Legal Sign-Off, 4: Approved
+        workflowStages: [
+          { key: 'draft', label: '1. Creator Draft', role: 'Maya Lin (Creator)' },
+          { key: 'ai_check', label: '2. AI Governance Check', role: '4 Parallel Agents' },
+          { key: 'brand_review', label: '3. Brand Manager Review', role: 'Rohan Mehta (Brand)' },
+          { key: 'legal_review', label: '4. Legal / Exec Sign-Off', role: 'Priya Sharma (Legal)' },
+          { key: 'approved', label: '5. Approved to Publish', role: 'Locked & Audited' }
+        ],
+        comments: [
+          {
+            author: 'Inkloom Co-Pilot (RAG Agent)',
+            role: 'Automated Check',
+            time: '10:14 AM',
+            text: 'Flagged ₹3,999 pricing in Paragraph 2 against Q3-Pricing-Matrix.pdf (Page 4). Suggested 1-click update to ₹4,999.'
+          },
+          {
+            author: 'Rohan Mehta',
+            role: 'Brand Manager',
+            time: '10:16 AM',
+            text: '@Maya Lin Please accept the tone and pricing rewrites before routing to Legal Counsel for SLA sign-off.'
+          }
+        ],
+        auditLogs: [
+          {
+            time: '10:12:04 AM',
+            actor: 'Maya Lin (Content Creator)',
+            action: 'Submitted draft via Inkloom Web Studio (Scenario: Q3 Launch)',
+            hash: '0x8f4a...c291'
+          },
+          {
+            time: '10:12:05 AM',
+            actor: 'Multi-Agent Engine (4 Workers)',
+            action: 'Completed parallel RAG + WCAG evaluation in 340ms',
+            hash: '0x3d9b...e104'
+          }
+        ],
+        rootCauseInsights: [
+          {
+            id: 'rc-1',
+            team: 'Growth Marketing Team',
+            issue: 'Repeated use of outdated ₹3,999 pricing tier (14 flags this week)',
+            rootCause: 'Legacy Q2 landing page template still linked in creator onboarding.',
+            proposedRule: {
+              dimension: 'facts',
+              trigger: 'starting at ₹3,499',
+              replacement: 'starting at ₹4,999 (Q3 Enterprise Tier)',
+              sourceDoc: 'Q3-Pricing-Matrix.pdf',
+              sourcePage: 'Page 4, Note B',
+              explanation: 'Clarified Q3 pricing floor across all regional growth templates.'
+            },
+            resolved: false
+          },
+          {
+            id: 'rc-2',
+            team: 'Product Marketing (Team Alpha)',
+            issue: 'Frequent use of "zero latency" in regional campaign headlines (9 flags)',
+            rootCause: 'Brand handbook lacked explicit approved phrasing for sub-10ms edge latency.',
+            proposedRule: {
+              dimension: 'legal',
+              trigger: 'zero latency',
+              replacement: 'sub-10ms p99 regional edge latency',
+              sourceDoc: 'Regulatory-Claims-Policy-2026.pdf',
+              sourcePage: 'Page 11, Sec 5.2',
+              explanation: 'Added approved quantitative latency phrasing to prevent unsupported absolute claims.'
+            },
+            resolved: false
+          },
+          {
+            id: 'rc-3',
+            team: 'Design & Social Studio',
+            issue: 'Low-contrast slate CTA buttons (#94A3B8) failing WCAG AA 4.5:1 (11 flags)',
+            rootCause: 'Secondary muted slate token mistakenly used as primary button fill in Figma kit.',
+            proposedRule: {
+              dimension: 'tone',
+              trigger: 'beta preview module',
+              replacement: 'general availability enterprise module',
+              sourceDoc: 'Brand-Voice-Handbook-v4.2.pdf',
+              sourcePage: 'Page 15, Launch Terms',
+              explanation: 'Locked primary CTA token to #2B2F55 and updated GA launch terminology.'
+            },
+            resolved: false
+          }
+        ]
+      };
+
+      // 4. Helper Functions: WCAG 2.1 Contrast & Audit Hash
+      function hexToRgb(hex) {
+        const clean = (hex || '#000000').replace('#', '');
+        const num = parseInt(clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean, 16);
+        return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+      }
+
+      function getLuminance(hex) {
+        const { r, g, b } = hexToRgb(hex);
+        const a = [r, g, b].map(v => {
+          v /= 255;
+          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+      }
+
+      function computeContrastRatio(hex1, hex2) {
+        const l1 = getLuminance(hex1);
+        const l2 = getLuminance(hex2);
+        const brightest = Math.max(l1, l2);
+        const darkest = Math.min(l1, l2);
+        return (brightest + 0.05) / (darkest + 0.05);
+      }
+
+      function generateHash() {
+        const chars = '0123456789abcdef';
+        let h1 = '0x', h2 = '';
+        for (let i = 0; i < 4; i++) h1 += chars[Math.floor(Math.random() * 16)];
+        for (let i = 0; i < 4; i++) h2 += chars[Math.floor(Math.random() * 16)];
+        return h1 + '...' + h2;
+      }
+
+      function nowTimeStr() {
+        const d = new Date();
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+
+      function addAuditLog(actionText) {
+        const persona = state.personaNames[state.activePersona];
+        state.auditLogs.unshift({
+          time: nowTimeStr(),
+          actor: persona.name + ' (' + persona.role + ')',
+          action: actionText,
+          hash: generateHash()
+        });
+        renderAuditAndApproval();
+      }
+
+      function showToast(message, type) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const bgClass = type === 'success' ? 'bg-emerald-700' : type === 'warning' ? 'bg-amber-600' : 'bg-[#2B2F55]';
+        toast.className = bgClass + ' text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-white/15 flex items-center gap-2 pointer-events-auto transition-all';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 250);
+        }, 3000);
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // 5. Core Multi-Agent Governance Evaluation Engine
+      function evaluateGovernance() {
+        const flags = [];
+        const lowerText = state.draftText.toLowerCase();
+
+        // Check text against all Knowledge Base rules
+        state.knowledgeBase.forEach(rule => {
+          const idx = lowerText.indexOf(rule.trigger.toLowerCase());
+          if (idx !== -1) {
+            const actualMatchedText = state.draftText.substr(idx, rule.trigger.length);
+            const isOverridden = Boolean(state.overriddenRuleIds[rule.id]);
+            flags.push({
+              id: rule.id,
+              dimension: rule.dimension,
+              agent: rule.agent,
+              severity: rule.severity,
+              trigger: actualMatchedText,
+              replacement: rule.replacement,
+              sourceDoc: rule.sourceDoc,
+              sourcePage: rule.sourcePage,
+              similarity: rule.similarity || '96.0%',
+              explanation: rule.explanation,
+              overridden: isOverridden,
+              overrideReason: state.overriddenRuleIds[rule.id] || null,
+              type: 'text'
+            });
+          }
+        });
+
+        // Visual Identity Agent Check (Approved Palette)
+        const approvedHexes = ['#2B2F55', '#4F46E5', '#0F172A', '#1E1B4B'];
+        const currentBgUpper = state.visualBgHex.toUpperCase();
+        if (!approvedHexes.includes(currentBgUpper)) {
+          const visualRuleId = 'rule-visual-hex';
+          flags.push({
+            id: visualRuleId,
+            dimension: 'visual',
+            agent: 'Visual & Accessibility Agent',
+            severity: 'Warning',
+            trigger: 'Banner Hex ' + currentBgUpper,
+            replacement: '#2B2F55 (Approved Ink Navy)',
+            sourceDoc: 'Visual-Identity-WCAG-Spec.pdf',
+            sourcePage: 'Page 6, Sec 2.1 (Brand Palette)',
+            similarity: '100%',
+            explanation: 'Non-compliant primary brand color (' + currentBgUpper + '). Visual Identity Guidelines require #2B2F55 (Ink Navy) or #4F46E5 (Indigo Core) for primary campaign headers.',
+            overridden: Boolean(state.overriddenRuleIds[visualRuleId]),
+            overrideReason: state.overriddenRuleIds[visualRuleId] || null,
+            type: 'visual_hex'
+          });
+        }
+
+        // Accessibility Agent Check (WCAG 2.1 Contrast + Mandatory Alt-Text)
+        const ratio = computeContrastRatio(state.visualBgHex, state.visualFgHex);
+        if (ratio < 4.5) {
+          const wcagRuleId = 'rule-wcag-contrast';
+          flags.push({
+            id: wcagRuleId,
+            dimension: 'accessibility',
+            agent: 'Visual & Accessibility Agent',
+            severity: 'Critical',
+            trigger: 'Contrast Ratio ' + ratio.toFixed(2) + ':1',
+            replacement: '4.5:1+ WCAG AA (#2B2F55 on #FFFFFF = 12.6:1)',
+            sourceDoc: 'Visual-Identity-WCAG-Spec.pdf',
+            sourcePage: 'Page 14, Sec 5.1 (WCAG 2.1 AA)',
+            similarity: '100%',
+            explanation: 'Foreground/background contrast ratio is ' + ratio.toFixed(2) + ':1, which fails the mandatory WCAG 2.1 AA minimum of 4.5:1 for normal text.',
+            overridden: Boolean(state.overriddenRuleIds[wcagRuleId]),
+            overrideReason: state.overriddenRuleIds[wcagRuleId] || null,
+            type: 'wcag_contrast'
+          });
+        }
+
+        if (!state.imageAltText || state.imageAltText.trim().length < 8) {
+          const altRuleId = 'rule-wcag-alt';
+          flags.push({
+            id: altRuleId,
+            dimension: 'accessibility',
+            agent: 'Visual & Accessibility Agent',
+            severity: 'Warning',
+            trigger: 'Missing Hero Image Alt-Text',
+            replacement: 'Descriptive screen-reader alt-text for campaign graphic',
+            sourceDoc: 'Visual-Identity-WCAG-Spec.pdf',
+            sourcePage: 'Page 16, Sec 5.4 (Screen Readers)',
+            similarity: '99.2%',
+            explanation: 'Mandatory alt-text is missing or under 8 characters. All visual assets require descriptive alt-text for screen reader accessibility.',
+            overridden: Boolean(state.overriddenRuleIds[altRuleId]),
+            overrideReason: state.overriddenRuleIds[altRuleId] || null,
+            type: 'wcag_alt'
+          });
+        }
+
+        state.activeFlags = flags;
+        renderStudio();
+        renderApiSandbox();
+      }
+
+      // 6. Compute Per-Dimension & Overall Scores
+      function computeScores() {
+        const dims = ['tone', 'facts', 'visual', 'accessibility', 'legal'];
+        const scores = {};
+        const counts = {};
+
+        dims.forEach(d => {
+          const active = state.activeFlags.filter(f => f.dimension === d && !f.overridden);
+          counts[d] = active.length;
+          if (active.length === 0) {
+            scores[d] = 100;
+          } else {
+            let penalty = 0;
+            active.forEach(f => {
+              penalty += f.severity === 'Critical' ? 42 : f.severity === 'Warning' ? 28 : 15;
+            });
+            scores[d] = Math.max(25, 100 - penalty);
+          }
+        });
+
+        const overall = Math.round((scores.tone + scores.facts + scores.visual + scores.accessibility + scores.legal) / 5);
+        return { scores, counts, overall };
+      }
+
+      // 7. Render Studio View (Scores, Annotated Draft, Flags, Telemetry)
+      function renderStudio() {
+        const { scores, counts, overall } = computeScores();
+        const unresolvedCount = state.activeFlags.filter(f => !f.overridden).length;
+
+        // Update Top Badges
+        const headerScoreBadge = document.getElementById('headerScoreBadge');
+        headerScoreBadge.textContent = overall + '%';
+        headerScoreBadge.className = 'text-xs font-bold px-2 py-0.5 rounded ' + (
+          overall >= 90 ? 'bg-emerald-400 text-slate-950' : overall >= 75 ? 'bg-amber-400 text-slate-950' : 'bg-rose-400 text-slate-950'
+        );
+
+        document.getElementById('tabFlagCountBadge').textContent = unresolvedCount;
+        document.getElementById('scoreOverall').textContent = overall + '%';
+        document.getElementById('barOverall').style.width = overall + '%';
+
+        const overallDelta = document.getElementById('scoreOverallDelta');
+        const overallDot = document.getElementById('overallStatusDot');
+        if (overall >= 92) {
+          overallDelta.textContent = 'Ready for Sign-Off';
+          overallDelta.className = 'text-xs font-semibold text-emerald-600';
+          overallDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+        } else if (overall >= 75) {
+          overallDelta.textContent = 'Minor Fixes Needed';
+          overallDelta.className = 'text-xs font-semibold text-amber-600';
+          overallDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+        } else {
+          overallDelta.textContent = unresolvedCount + ' Flags Active';
+          overallDelta.className = 'text-xs font-semibold text-rose-600';
+          overallDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+        }
+
+        const dimMap = [
+          { key: 'tone', scoreId: 'scoreTone', barId: 'barTone', countId: 'countToneFlags' },
+          { key: 'facts', scoreId: 'scoreFacts', barId: 'barFacts', countId: 'countFactsFlags' },
+          { key: 'visual', scoreId: 'scoreVisual', barId: 'barVisual', countId: 'countVisualFlags' },
+          { key: 'accessibility', scoreId: 'scoreAccessibility', barId: 'barAccessibility', countId: 'countAccessibilityFlags' },
+          { key: 'legal', scoreId: 'scoreLegal', barId: 'barLegal', countId: 'countLegalFlags' }
+        ];
+
+        dimMap.forEach(item => {
+          document.getElementById(item.scoreId).textContent = scores[item.key] + '%';
+          document.getElementById(item.barId).style.width = scores[item.key] + '%';
+          const c = counts[item.key];
+          document.getElementById(item.countId).textContent = c === 0 ? '✓ Compliant' : c + (c === 1 ? ' flag' : ' flags');
+        });
+
+        // Update Visual & WCAG Preview
+        document.getElementById('visualBgHexLabel').textContent = state.visualBgHex.toUpperCase();
+        document.getElementById('visualBgColorInput').value = state.visualBgHex;
+        document.getElementById('visualFgColorInput').value = state.visualFgHex;
+        document.getElementById('imageAltTextInput').value = state.imageAltText;
+
+        const ratio = computeContrastRatio(state.visualBgHex, state.visualFgHex);
+        document.getElementById('wcagRatioValue').textContent = ratio.toFixed(2) + ':1';
+        const wcagBadge = document.getElementById('wcagPassBadge');
+        if (ratio >= 7.0) {
+          wcagBadge.textContent = 'PASS AAA';
+          wcagBadge.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800';
+        } else if (ratio >= 4.5) {
+          wcagBadge.textContent = 'PASS AA';
+          wcagBadge.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800';
+        } else {
+          wcagBadge.textContent = 'FAIL AA';
+          wcagBadge.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700';
+        }
+        const chip = document.getElementById('wcagSampleChip');
+        chip.style.backgroundColor = state.visualBgHex;
+        chip.style.color = state.visualFgHex;
+
+        // Render Annotated Draft with Inline Highlights
+        const annotatedPane = document.getElementById('annotatedEditorPane');
+        const rawTextarea = document.getElementById('rawDraftTextarea');
+        rawTextarea.value = state.draftText;
+
+        let htmlParagraphs = state.draftText.split('\n\n').map(para => {
+          let safePara = escapeHtml(para);
+          state.activeFlags.filter(f => f.type === 'text' && !f.overridden).forEach(flag => {
+            const escapedTrigger = escapeHtml(flag.trigger);
+            const regex = new RegExp(escapedTrigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            safePara = safePara.replace(regex, match => {
+              return `<span class="flag-highlight flag-${flag.dimension}" data-flag-id="${flag.id}" title="Click to inspect citation: ${escapeHtml(flag.sourceDoc)} (${escapeHtml(flag.sourcePage)})">${match}</span>`;
+            });
+          });
+          return `<p>${safePara}</p>`;
+        }).join('');
+
+        if (unresolvedCount === 0) {
+          htmlParagraphs += `<div class="mt-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium flex items-center justify-between">
+            <span>✓ All 5 governance dimensions pass enterprise compliance checks! Ready for Role Sign-Off.</span>
+          </div>`;
+        }
+        annotatedPane.innerHTML = htmlParagraphs;
+
+        // Render Telemetry Grid
+        const telemetryGrid = document.getElementById('agentTelemetryGrid');
+        const agentSummaries = [
+          { name: 'Tone & Style Agent', dim: 'tone', model: 'Hybrid Style-RAG', ms: '185ms', status: counts.tone === 0 ? 'Passed' : counts.tone + ' Flag(s)' },
+          { name: 'Fact-Checking & RAG Agent', dim: 'facts', model: 'Qdrant Top-K Chunk Verify', ms: '310ms', status: counts.facts === 0 ? 'Passed' : counts.facts + ' Flag(s)' },
+          { name: 'Visual & Accessibility Agent', dim: 'accessibility', model: 'WCAG 2.1 + Hex Delta-E', ms: '95ms', status: (counts.visual + counts.accessibility) === 0 ? 'Passed' : (counts.visual + counts.accessibility) + ' Flag(s)' },
+          { name: 'Policy & Legal Agent', dim: 'legal', model: 'ASCI/SLA Clause Guard', ms: '270ms', status: counts.legal === 0 ? 'Passed' : counts.legal + ' Flag(s)' }
+        ];
+        telemetryGrid.innerHTML = agentSummaries.map(a => {
+          const ok = a.status === 'Passed';
+          return `<div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-slate-800">${a.name}</div>
+              <div class="text-[11px] text-slate-500 font-mono">${a.model} • ${a.ms}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${ok ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${a.status}</span>
+          </div>`;
+        }).join('');
+
+        // Render Flags List
+        const flagsContainer = document.getElementById('flagsListContainer');
+        const filteredFlags = state.activeFlags.filter(f => state.flagFilter === 'all' || f.dimension === state.flagFilter);
+
+        if (filteredFlags.length === 0) {
+          flagsContainer.innerHTML = `<div class="p-6 text-center space-y-2">
+            <div class="text-2xl">🎉</div>
+            <div class="text-sm font-bold text-slate-800">No Active Flags in This View</div>
+            <p class="text-xs text-slate-500">All evaluated claims, tone guidelines, visual tokens, and accessibility rules are compliant.</p>
+          </div>`;
+        } else {
+          flagsContainer.innerHTML = filteredFlags.map(f => {
+            const dimBadgeMap = {
+              tone: 'bg-violet-100 text-violet-800',
+              facts: 'bg-amber-100 text-amber-900',
+              visual: 'bg-pink-100 text-pink-800',
+              accessibility: 'bg-sky-100 text-sky-800',
+              legal: 'bg-red-100 text-red-800'
+            };
+            const badgeClass = dimBadgeMap[f.dimension] || 'bg-slate-100 text-slate-800';
+            return `<div id="card-${f.id}" class="p-3.5 rounded-xl border ${f.overridden ? 'border-slate-200 bg-slate-50 opacity-75' : 'border-slate-200 bg-white shadow-xs'} space-y-2.5 transition">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded ${badgeClass}">${f.dimension}</span>
+                  <span class="text-[11px] font-semibold text-slate-600">${f.agent}</span>
+                </div>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">RAG Match: ${f.similarity}</span>
+              </div>
+
+              <div class="text-xs text-slate-700 leading-relaxed">
+                ${escapeHtml(f.explanation)}
+              </div>
+
+              <!-- Source Citation Box -->
+              <div class="p-2 rounded-lg bg-indigo-50/70 border border-indigo-100 flex items-center justify-between text-[11px]">
+                <span class="font-semibold text-indigo-900">📄 Source: ${escapeHtml(f.sourceDoc)} (${escapeHtml(f.sourcePage)})</span>
+                <button type="button" data-goto-kb="${escapeHtml(f.sourceDoc)}" class="text-indigo-600 hover:underline font-semibold">View Rule →</button>
+              </div>
+
+              <!-- Flagged vs Smart Rewrite Box -->
+              <div class="grid grid-cols-1 gap-1.5 text-xs">
+                <div class="p-2 rounded bg-rose-50 border border-rose-200/70 text-rose-900">
+                  <span class="font-bold uppercase text-[10px] text-rose-700 block">Flagged in Draft:</span>
+                  <span class="line-through">${escapeHtml(f.trigger)}</span>
+                </div>
+                <div class="p-2 rounded bg-emerald-50 border border-emerald-200/70 text-emerald-900">
+                  <span class="font-bold uppercase text-[10px] text-emerald-700 block">1-Click Smart Rewrite:</span>
+                  <span class="font-semibold">${escapeHtml(f.replacement)}</span>
+                </div>
+              </div>
+
+              ${f.overridden ? `
+                <div class="p-2 rounded bg-amber-50 border border-amber-200 text-[11px] text-amber-900">
+                  <strong>Human Override Active:</strong> ${escapeHtml(f.overrideReason)}
+                </div>
+              ` : `
+                <div class="flex items-center gap-2 pt-1">
+                  <button type="button" data-accept-flag="${f.id}" class="flex-1 py-1.5 px-3 rounded-lg bg-[#2B2F55] hover:bg-indigo-900 text-white text-xs font-bold transition">
+                    ✓ Accept 1-Click Rewrite
+                  </button>
+                  <button type="button" data-override-flag="${f.id}" class="py-1.5 px-2.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition">
+                    Override
+                  </button>
+                </div>
+              `}
+            </div>`;
+          }).join('');
+        }
+      }
+
+      // 8. Apply 1-Click Smart Rewrite (Single or All)
+      function applySingleRewrite(flagId) {
+        const flag = state.activeFlags.find(f => f.id === flagId);
+        if (!flag) return;
+
+        if (flag.type === 'text') {
+          const regex = new RegExp(flag.trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          state.draftText = state.draftText.replace(regex, flag.replacement);
+          addAuditLog('Accepted 1-Click Smart Rewrite for "' + flag.trigger + '" → "' + flag.replacement + '" (' + flag.sourceDoc + ')');
+          showToast('Applied Smart Rewrite (' + flag.sourceDoc + ')', 'success');
+        } else if (flag.type === 'visual_hex' || flag.type === 'wcag_contrast') {
+          state.visualBgHex = '#2B2F55';
+          state.visualFgHex = '#FFFFFF';
+          addAuditLog('Snapped primary brand hex to #2B2F55 (WCAG AAA 12.6:1 contrast)');
+          showToast('Updated visual palette to approved #2B2F55 token', 'success');
+        } else if (flag.type === 'wcag_alt') {
+          state.imageAltText = 'Acme Cloud enterprise governance interface displaying five real-time compliance dimensions';
+          addAuditLog('Generated mandatory WCAG 2.1 hero image alt-text');
+          showToast('Added compliant screen-reader alt-text', 'success');
+        }
+
+        evaluateGovernance();
+      }
+
+      function applyAllRewrites() {
+        const openFlags = state.activeFlags.filter(f => !f.overridden);
+        if (openFlags.length === 0) {
+          showToast('All governance checks are already compliant!', 'success');
+          return;
+        }
+        openFlags.forEach(flag => {
+          if (flag.type === 'text') {
+            const regex = new RegExp(flag.trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            state.draftText = state.draftText.replace(regex, flag.replacement);
+          } else if (flag.type === 'visual_hex' || flag.type === 'wcag_contrast') {
+            state.visualBgHex = '#2B2F55';
+            state.visualFgHex = '#FFFFFF';
+          } else if (flag.type === 'wcag_alt') {
+            state.imageAltText = 'Acme Cloud enterprise governance interface displaying five real-time compliance dimensions';
+          }
+        });
+        addAuditLog('Applied all ' + openFlags.length + ' AI Smart Rewrites across text, pricing, and WCAG metadata');
+        evaluateGovernance();
+        showToast('Applied all ' + openFlags.length + ' Smart Rewrites! Compliance is now 100%.', 'success');
+      }
+
+      // 9. Render Knowledge Base Tab (Stage 1)
+      function renderKnowledgeBase() {
+        const searchVal = (document.getElementById('kbSearchInput').value || '').toLowerCase();
+        const dimVal = document.getElementById('kbDimensionFilter').value;
+
+        document.getElementById('kbTotalRulesCount').textContent = state.knowledgeBase.length;
+        document.getElementById('tabRuleCountBadge').textContent = state.knowledgeBase.length + ' Rules';
+
+        const filtered = state.knowledgeBase.filter(r => {
+          const matchesDim = dimVal === 'all' || r.dimension === dimVal;
+          const matchesSearch = !searchVal ||
+            r.trigger.toLowerCase().includes(searchVal) ||
+            r.replacement.toLowerCase().includes(searchVal) ||
+            r.sourceDoc.toLowerCase().includes(searchVal) ||
+            r.explanation.toLowerCase().includes(searchVal);
+          return matchesDim && matchesSearch;
+        });
+
+        const listEl = document.getElementById('kbRulesList');
+        listEl.innerHTML = filtered.map(r => {
+          return `<div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">${r.dimension}</span>
+                <span class="text-xs font-bold text-slate-900">📄 ${escapeHtml(r.sourceDoc)} • ${escapeHtml(r.sourcePage)}</span>
+              </div>
+              <span class="text-[10px] font-mono text-slate-500">Chunk ID: ${r.id}</span>
+            </div>
+            <p class="text-xs text-slate-700">${escapeHtml(r.explanation)}</p>
+            <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+              <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">Flag Pattern: <strong>"${escapeHtml(r.trigger)}"</strong></span>
+              <span>→</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Approved Rewrite: <strong>"${escapeHtml(r.replacement)}"</strong></span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // 10. Render Role-Based Approval & Audit Trail Tab (Stage 5)
+      function renderAuditAndApproval() {
+        const stepper = document.getElementById('approvalStepperContainer');
+        stepper.innerHTML = state.workflowStages.map((stg, idx) => {
+          const isDone = idx < state.workflowStageIndex;
+          const isCurrent = idx === state.workflowStageIndex;
+          const boxClass = isDone
+            ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+            : isCurrent
+              ? 'border-indigo-600 bg-indigo-50 text-indigo-950 ring-2 ring-indigo-500/20'
+              : 'border-slate-200 bg-slate-50 text-slate-400';
+          return `<div class="p-3 rounded-xl border ${boxClass} flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase">${isDone ? '✓ Completed' : isCurrent ? '● Active Stage' : 'Pending'}</span>
+            </div>
+            <div class="text-xs font-extrabold mt-1">${stg.label}</div>
+            <div class="text-[11px] opacity-80 mt-0.5">${stg.role}</div>
+          </div>`;
+        }).join('');
+
+        const currentStage = state.workflowStages[state.workflowStageIndex];
+        document.getElementById('headerStageBadge').textContent = 'Stage: ' + currentStage.label.replace(/^\d+\.\s*/, '');
+
+        const persona = state.personaNames[state.activePersona];
+        document.getElementById('approvalActivePersonaLabel').textContent = persona.name + ' (' + persona.role + ')';
+
+        // Render Comments
+        const commentsEl = document.getElementById('commentsListContainer');
+        commentsEl.innerHTML = state.comments.map(c => {
+          return `<div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-bold text-slate-900">${escapeHtml(c.author)} <span class="font-normal text-indigo-600">(${escapeHtml(c.role)})</span></span>
+              <span class="text-slate-400">${escapeHtml(c.time)}</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">${escapeHtml(c.text)}</p>
+          </div>`;
+        }).join('');
+
+        // Render Audit Logs
+        document.getElementById('tabAuditCountBadge').textContent = state.auditLogs.length + ' Logs';
+        const auditBody = document.getElementById('auditTableBody');
+        auditBody.innerHTML = state.auditLogs.map(log => {
+          return `<tr class="hover:bg-slate-50">
+            <td class="py-2 px-2.5 font-mono text-[11px] text-slate-500 whitespace-nowrap">${escapeHtml(log.time)}</td>
+            <td class="py-2 px-2.5 font-semibold text-slate-800">${escapeHtml(log.actor)}</td>
+            <td class="py-2 px-2.5 text-slate-700">${escapeHtml(log.action)}</td>
+            <td class="py-2 px-2.5 font-mono text-[11px] text-indigo-600">${escapeHtml(log.hash)}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      // 11. Render Root-Cause Analytics & Closed-Loop Refinement (Stage 6)
+      let teamChartInstance = null;
+      let trendChartInstance = null;
+
+      function renderAnalytics() {
+        const container = document.getElementById('rootCauseInsightsList');
+        const activeCount = state.rootCauseInsights.filter(i => !i.resolved).length;
+        document.getElementById('kpiRefinedCount').textContent = activeCount + ' Active';
+
+        container.innerHTML = state.rootCauseInsights.map(item => {
+          return `<div class="p-4 rounded-xl border ${item.resolved ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-slate-50'} flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">${escapeHtml(item.team)}</span>
+                <span class="text-[10px] font-bold ${item.resolved ? 'text-emerald-700' : 'text-amber-700'}">${item.resolved ? '✓ Guideline Patched' : '⚠ Ambiguity Detected'}</span>
+              </div>
+              <h3 class="text-xs font-bold text-slate-900">${escapeHtml(item.issue)}</h3>
+              <p class="text-[11px] text-slate-600"><strong>Root Cause:</strong> ${escapeHtml(item.rootCause)}</p>
+              <div class="p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700">
+                <strong>Proposed Patch (${escapeHtml(item.proposedRule.sourceDoc)}):</strong> Flag <em>"${escapeHtml(item.proposedRule.trigger)}"</em> → Rewrite to <em>"${escapeHtml(item.proposedRule.replacement)}"</em>
+              </div>
+            </div>
+            ${item.resolved ? `
+              <button type="button" disabled class="w-full py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold opacity-80 cursor-default">
+                ✓ Rule Synced to Stage 1 Knowledge Base
+              </button>
+            ` : `
+              <button type="button" data-refine-id="${item.id}" class="w-full py-1.5 rounded-lg bg-[#2B2F55] hover:bg-indigo-900 text-white text-xs font-bold transition shadow-xs">
+                ⚡ Refine Guideline at Source
+              </button>
+            `}
+          </div>`;
+        }).join('');
+
+        if (typeof Chart !== 'undefined') {
+          const ctx1 = document.getElementById('chartViolationsByTeam');
+          const ctx2 = document.getElementById('chartComplianceTrend');
+          if (ctx1 && !teamChartInstance) {
+            teamChartInstance = new Chart(ctx1, {
+              type: 'bar',
+              data: {
+                labels: ['Tone & Voice', 'Facts & Pricing', 'Visual Hex', 'WCAG Contrast', 'Legal Claims'],
+                datasets: [
+                  { label: 'Growth Marketing', data: [18, 24, 9, 14, 11], backgroundColor: '#4F46E5', borderRadius: 4 },
+                  { label: 'Product Comms', data: [12, 8, 5, 7, 15], backgroundColor: '#2B2F55', borderRadius: 4 },
+                  { label: 'Partner Agency', data: [22, 19, 16, 18, 9], backgroundColor: '#94A3B8', borderRadius: 4 }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+              }
+            });
+          }
+          if (ctx2 && !trendChartInstance) {
+            trendChartInstance = new Chart(ctx2, {
+              type: 'line',
+              data: {
+                labels: ['Week 1', 'Week 2', 'Week 3 (RAG Live)', 'Week 4 (Loop Patch)', 'Week 5', 'Week 6 (Current)'],
+                datasets: [
+                  {
+                    label: 'First-Pass Brand Compliance (%)',
+                    data: [54, 61, 74, 83, 91, 96],
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 4
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                scales: { y: { min: 40, max: 100, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+              }
+            });
+          }
+        }
+      }
+
+      // 12. Render Live API Sandbox (Tab 5)
+      function renderApiSandbox() {
+        const endpoint = document.getElementById('apiEndpointSelect').value;
+        const { scores, overall } = computeScores();
+        const reqPre = document.getElementById('apiRequestPre');
+        const resPre = document.getElementById('apiResponsePre');
+
+        if (endpoint === 'evaluate') {
+          reqPre.textContent = JSON.stringify({
+            tenant_id: 'acme-enterprise-in',
+            intake_channel: state.intakeChannel,
+            document_title: state.draftTitle,
+            content_body: state.draftText.slice(0, 140) + '...',
+            visual_metadata: {
+              primary_hex: state.visualBgHex,
+              foreground_hex: state.visualFgHex,
+              hero_alt_text: state.imageAltText || null
+            },
+            agents: ['tone_style', 'fact_rag', 'visual_wcag', 'policy_legal']
+          }, null, 2);
+
+          resPre.textContent = JSON.stringify({
+            status: 'completed',
+            execution_ms: 312,
+            overall_compliance_score: overall,
+            dimension_scores: scores,
+            flags_detected: state.activeFlags.filter(f => !f.overridden).map(f => ({
+              id: f.id,
+              dimension: f.dimension,
+              agent: f.agent,
+              flagged_span: f.trigger,
+              smart_rewrite: f.replacement,
+              citation: { document: f.sourceDoc, location: f.sourcePage, rag_confidence: f.similarity }
+            }))
+          }, null, 2);
+        } else if (endpoint === 'ingest') {
+          reqPre.textContent = JSON.stringify({
+            tenant_id: 'acme-enterprise-in',
+            source_document: 'Q3-Pricing-Matrix.pdf',
+            embedding_model: 'text-embedding-3-large',
+            chunk_strategy: 'semantic_clause_boundary',
+            clauses: state.knowledgeBase.slice(0, 2)
+          }, null, 2);
+
+          resPre.textContent = JSON.stringify({
+            status: 'indexed',
+            vector_collection: 'qdrant://acme_brand_vault_v2',
+            total_active_rules: state.knowledgeBase.length,
+            isolation_policy: 'AES-256_TENANT_STRICT'
+          }, null, 2);
+        } else {
+          reqPre.textContent = JSON.stringify({
+            draft_id: 'drf_9021_q3_launch',
+            actor_role: state.personaNames[state.activePersona].role,
+            target_stage: state.workflowStages[state.workflowStageIndex].key,
+            open_critical_flags: state.activeFlags.filter(f => !f.overridden && f.severity === 'Critical').length
+          }, null, 2);
+
+          resPre.textContent = JSON.stringify({
+            workflow_state: state.workflowStages[state.workflowStageIndex].label,
+            audit_trail_entry: state.auditLogs[0]
+          }, null, 2);
+        }
+      }
+
+      // 13. Tab Switching Logic
+      function switchTab(tabKey) {
+        state.activeTab = tabKey;
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+          panel.classList.toggle('hidden', panel.id !== 'tab-' + tabKey);
+        });
+        document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+          const active = btn.getAttribute('data-tab') === tabKey;
+          btn.className = 'nav-tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1.5 ' + (
+            active ? 'bg-indigo-600 text-white shadow-sm' : 'text-indigo-200 hover:bg-white/10 hover:text-white'
+          );
+        });
+
+        if (tabKey === 'knowledge') renderKnowledgeBase();
+        if (tabKey === 'approval') renderAuditAndApproval();
+        if (tabKey === 'analytics') setTimeout(renderAnalytics, 60);
+        if (tabKey === 'architecture') renderApiSandbox();
+      }
+
+      // 14. Event Listeners & Delegation
+      document.addEventListener('DOMContentLoaded', () => {
+        // Initial evaluation
+        evaluateGovernance();
+        renderKnowledgeBase();
+        renderAuditAndApproval();
+
+        // Navigation Tabs
+        document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+        });
+
+        // Scenario Preset Selector
+        document.getElementById('scenarioPresetSelect').addEventListener('change', e => {
+          const key = e.target.value;
+          const sc = demoScenarios[key];
+          if (!sc) return;
+          state.currentScenarioKey = key;
+          state.draftTitle = sc.title;
+          state.intakeChannel = sc.channel;
+          state.draftText = sc.text;
+          state.visualBgHex = sc.bgHex;
+          state.visualFgHex = sc.fgHex;
+          state.imageAltText = sc.altText;
+          state.overriddenRuleIds = {};
+          state.workflowStageIndex = 1;
+          document.getElementById('draftTitleInput').value = sc.title;
+          document.getElementById('intakeChannelSelect').value = sc.channel;
+          addAuditLog('Loaded scenario "' + sc.title + '" via ' + sc.channel);
+          evaluateGovernance();
+          showToast('Loaded scenario: ' + sc.title, 'info');
+        });
+
+        // Intake Channel Selector
+        document.getElementById('intakeChannelSelect').addEventListener('change', e => {
+          state.intakeChannel = e.target.value;
+          addAuditLog('Switched multi-channel intake source to ' + state.intakeChannel);
+          renderApiSandbox();
+          showToast('Intake source set to ' + state.intakeChannel, 'info');
+        });
+
+        // Persona Switcher
+        document.getElementById('personaSelect').addEventListener('change', e => {
+          state.activePersona = e.target.value;
+          const p = state.personaNames[state.activePersona];
+          addAuditLog('Switched active reviewer role to ' + p.name + ' (' + p.role + ')');
+          renderAuditAndApproval();
+          showToast('Active role: ' + p.name + ' (' + p.role + ')', 'info');
+        });
+
+        // Mode Toggle: Annotated vs Edit Raw
+        document.getElementById('btnModeAnnotated').addEventListener('click', () => {
+          state.editMode = 'annotated';
+          document.getElementById('annotatedEditorPane').classList.remove('hidden');
+          document.getElementById('rawEditorPane').classList.add('hidden');
+          document.getElementById('btnModeAnnotated').className = 'px-2.5 py-1 rounded text-xs font-semibold bg-white text-indigo-700 shadow-sm transition';
+          document.getElementById('btnModeEdit').className = 'px-2.5 py-1 rounded text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+          evaluateGovernance();
+        });
+
+        document.getElementById('btnModeEdit').addEventListener('click', () => {
+          state.editMode = 'raw';
+          document.getElementById('annotatedEditorPane').classList.add('hidden');
+          document.getElementById('rawEditorPane').classList.remove('hidden');
+          document.getElementById('btnModeEdit').className = 'px-2.5 py-1 rounded text-xs font-semibold bg-white text-indigo-700 shadow-sm transition';
+          document.getElementById('btnModeAnnotated').className = 'px-2.5 py-1 rounded text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        });
+
+        document.getElementById('rawDraftTextarea').addEventListener('input', e => {
+          state.draftText = e.target.value;
+        });
+
+        // Visual & WCAG Inputs
+        document.getElementById('visualBgColorInput').addEventListener('input', e => {
+          state.visualBgHex = e.target.value;
+          evaluateGovernance();
+        });
+        document.getElementById('visualFgColorInput').addEventListener('input', e => {
+          state.visualFgHex = e.target.value;
+          evaluateGovernance();
+        });
+        document.getElementById('imageAltTextInput').addEventListener('input', e => {
+          state.imageAltText = e.target.value;
+          evaluateGovernance();
+        });
+
+        document.getElementById('btnGenerateAltText').addEventListener('click', () => {
+          state.imageAltText = 'Acme Cloud enterprise governance interface displaying five real-time compliance dimensions';
+          addAuditLog('AI Accessibility Agent generated screen-reader alt-text');
+          evaluateGovernance();
+          showToast('Generated WCAG-compliant image alt-text!', 'success');
+        });
+
+        document.getElementById('btnAutoFixVisuals').addEventListener('click', () => {
+          state.visualBgHex = '#2B2F55';
+          state.visualFgHex = '#FFFFFF';
+          state.imageAltText = 'Acme Cloud enterprise governance interface displaying five real-time compliance dimensions';
+          addAuditLog('Snapped visual palette (#2B2F55) and alt-text to brand accessibility spec');
+          evaluateGovernance();
+          showToast('Visual palette & WCAG contrast fixed (12.6:1 AAA)!', 'success');
+        });
+
+        // Run Multi-Agent Governance Check Button
+        document.getElementById('btnRunGovernanceCheck').addEventListener('click', () => {
+          const btn = document.getElementById('btnRunGovernanceCheck');
+          btn.textContent = '⏳ Running 4 Agents in Parallel...';
+          setTimeout(() => {
+            btn.innerHTML = '<span>⚡ Run Parallel Multi-Agent Check</span>';
+            if (state.editMode === 'raw') {
+              document.getElementById('btnModeAnnotated').click();
+            } else {
+              evaluateGovernance();
+            }
+            addAuditLog('Executed parallel 4-agent governance check via ' + state.intakeChannel);
+            showToast('Multi-Agent Check Complete across all 5 dimensions!', 'success');
+          }, 260);
+        });
+
+        // Accept All Rewrites
+        document.getElementById('btnAcceptAllRewrites').addEventListener('click', applyAllRewrites);
+
+        // Advance to Approval Tab
+        document.getElementById('btnAdvanceToApproval').addEventListener('click', () => {
+          switchTab('approval');
+          showToast('Routed draft to Role-Based Sign-Off Chain', 'info');
+        });
+
+        // Filter Pills for Flags
+        document.querySelectorAll('.flag-filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.flagFilter = btn.getAttribute('data-filter');
+            renderStudio();
+          });
+        });
+
+        // Delegated Clicks inside Studio (Inline Flag Clicks, Accept Rewrite, Override, View Rule)
+        document.getElementById('tab-studio').addEventListener('click', e => {
+          const highlightEl = e.target.closest('.flag-highlight');
+          if (highlightEl) {
+            const flagId = highlightEl.getAttribute('data-flag-id');
+            const cardEl = document.getElementById('card-' + flagId);
+            if (cardEl) {
+              cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              cardEl.classList.add('ring-2', 'ring-indigo-600');
+              setTimeout(() => cardEl.classList.remove('ring-2', 'ring-indigo-600'), 1600);
+            }
+            return;
+          }
+
+          const acceptBtn = e.target.closest('[data-accept-flag]');
+          if (acceptBtn) {
+            applySingleRewrite(acceptBtn.getAttribute('data-accept-flag'));
+            return;
+          }
+
+          const overrideBtn = e.target.closest('[data-override-flag]');
+          if (overrideBtn) {
+            const flagId = overrideBtn.getAttribute('data-override-flag');
+            const flag = state.activeFlags.find(f => f.id === flagId);
+            if (!flag) return;
+            state.pendingOverrideRuleId = flagId;
+            document.getElementById('overrideFlagSummary').textContent =
+              'Flagged: "' + flag.trigger + '" (' + flag.sourceDoc + ', ' + flag.sourcePage + ')';
+            document.getElementById('overrideModal').classList.remove('hidden');
+            document.getElementById('overrideModal').classList.add('flex');
+            return;
+          }
+
+          const gotoKbBtn = e.target.closest('[data-goto-kb]');
+          if (gotoKbBtn) {
+            const docName = gotoKbBtn.getAttribute('data-goto-kb');
+            document.getElementById('kbSearchInput').value = docName;
+            switchTab('knowledge');
+          }
+        });
+
+        // Side-by-Side Diff Modal
+        document.getElementById('btnOpenDiffModal').addEventListener('click', () => {
+          document.getElementById('diffCurrentText').innerHTML = state.draftText.split('\n\n').map(p => `<p>${escapeHtml(p)}</p>`).join('');
+          let compliantPreview = state.draftText;
+          state.activeFlags.filter(f => f.type === 'text' && !f.overridden).forEach(f => {
+            const regex = new RegExp(f.trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            compliantPreview = compliantPreview.replace(regex, f.replacement);
+          });
+          document.getElementById('diffCompliantText').innerHTML = compliantPreview.split('\n\n').map(p => `<p>${escapeHtml(p)}</p>`).join('');
+          document.getElementById('diffModal').classList.remove('hidden');
+          document.getElementById('diffModal').classList.add('flex');
+        });
+
+        document.getElementById('btnCloseDiffModal').addEventListener('click', () => {
+          document.getElementById('diffModal').classList.add('hidden');
+          document.getElementById('diffModal').classList.remove('flex');
+        });
+
+        document.getElementById('btnApplyDiffAll').addEventListener('click', () => {
+          applyAllRewrites();
+          document.getElementById('diffModal').classList.add('hidden');
+          document.getElementById('diffModal').classList.remove('flex');
+        });
+
+        // Override Modal Controls
+        const closeOverride = () => {
+          document.getElementById('overrideModal').classList.add('hidden');
+          document.getElementById('overrideModal').classList.remove('flex');
+          state.pendingOverrideRuleId = null;
+        };
+        document.getElementById('btnCloseOverrideModal').addEventListener('click', closeOverride);
+        document.getElementById('btnCancelOverride').addEventListener('click', closeOverride);
+        document.getElementById('btnConfirmOverride').addEventListener('click', () => {
+          const reason = document.getElementById('overrideReasonInput').value.trim() || 'Creator exception logged';
+          if (state.pendingOverrideRuleId) {
+            state.overriddenRuleIds[state.pendingOverrideRuleId] = reason;
+            addAuditLog('Human Override logged for ' + state.pendingOverrideRuleId + ': "' + reason + '"');
+            evaluateGovernance();
+            showToast('Override logged in Permanent Audit Trail', 'warning');
+          }
+          closeOverride();
+        });
+
+        // Knowledge Base Search & Add Rule
+        document.getElementById('kbSearchInput').addEventListener('input', renderKnowledgeBase);
+        document.getElementById('kbDimensionFilter').addEventListener('change', renderKnowledgeBase);
+
+        document.getElementById('btnAddCustomRule').addEventListener('click', () => {
+          const dim = document.getElementById('newRuleDimension').value;
+          const trig = document.getElementById('newRuleTrigger').value.trim();
+          const repl = document.getElementById('newRuleReplacement').value.trim();
+          const doc = document.getElementById('newRuleSourceDoc').value.trim() || 'Custom-Brand-Policy.pdf';
+          const page = document.getElementById('newRuleSourcePage').value.trim() || 'Page 1';
+          const expl = document.getElementById('newRuleExplanation').value.trim() || 'Custom organization rule indexed via Knowledge Base.';
+
+          if (!trig || !repl) {
+            showToast('Please enter both a prohibited phrase and an approved replacement.', 'warning');
+            return;
+          }
+
+          const agentMap = {
+            facts: 'Fact-Checking & RAG Agent',
+            tone: 'Tone & Style Agent',
+            legal: 'Policy & Compliance Agent'
+          };
+
+          const newRule = {
+            id: 'rule-custom-' + (state.knowledgeBase.length + 1),
+            dimension: dim,
+            agent: agentMap[dim] || 'Fact-Checking & RAG Agent',
+            severity: 'Warning',
+            trigger: trig,
+            replacement: repl,
+            sourceDoc: doc,
+            sourcePage: page,
+            similarity: '99.4%',
+            explanation: expl
+          };
+
+          state.knowledgeBase.unshift(newRule);
+          document.getElementById('newRuleTrigger').value = '';
+          document.getElementById('newRuleReplacement').value = '';
+          document.getElementById('newRuleExplanation').value = '';
+
+          addAuditLog('Indexed new vector rule "' + trig + '" → "' + repl + '" (' + doc + ')');
+          renderKnowledgeBase();
+          evaluateGovernance();
+          showToast('Embedded new rule into Vector Knowledge Base!', 'success');
+        });
+
+        // Approval Workflow Controls
+        document.getElementById('btnWorkflowStepForward').addEventListener('click', () => {
+          if (state.workflowStageIndex < state.workflowStages.length - 1) {
+            state.workflowStageIndex++;
+            const stg = state.workflowStages[state.workflowStageIndex];
+            addAuditLog('Advanced workflow state to "' + stg.label + '"');
+            renderAuditAndApproval();
+            showToast('Workflow advanced to ' + stg.label, 'success');
+          } else {
+            showToast('Draft is already Approved for Publication!', 'success');
+          }
+        });
+
+        document.getElementById('btnWorkflowStepBack').addEventListener('click', () => {
+          if (state.workflowStageIndex > 0) {
+            state.workflowStageIndex--;
+            const stg = state.workflowStages[state.workflowStageIndex];
+            addAuditLog('Returned draft to "' + stg.label + '" for revisions');
+            renderAuditAndApproval();
+            showToast('Returned draft to ' + stg.label, 'warning');
+          }
+        });
+
+        document.getElementById('btnWorkflowFastApprove').addEventListener('click', () => {
+          applyAllRewrites();
+          state.workflowStageIndex = 4;
+          addAuditLog('Executive & Legal Sign-Off completed. Status locked as APPROVED.');
+          renderAuditAndApproval();
+          showToast('Draft Approved & Cryptographic Audit Trail Locked!', 'success');
+        });
+
+        // Post Comment
+        document.getElementById('btnPostComment').addEventListener('click', () => {
+          const input = document.getElementById('newCommentInput');
+          const txt = input.value.trim();
+          if (!txt) return;
+          const p = state.personaNames[state.activePersona];
+          state.comments.push({
+            author: p.name,
+            role: p.role,
+            time: nowTimeStr(),
+            text: txt
+          });
+          input.value = '';
+          addAuditLog('Posted review comment in approval thread');
+          renderAuditAndApproval();
+          showToast('Comment added to review thread', 'info');
+        });
+
+        // Export Audit Log JSON
+        document.getElementById('btnExportAuditJson').addEventListener('click', () => {
+          const payload = JSON.stringify({
+            project: 'Inkloom AI — Team DejaVu',
+            draft_title: state.draftTitle,
+            workflow_status: state.workflowStages[state.workflowStageIndex].label,
+            audit_records: state.auditLogs
+          }, null, 2);
+          const blob = new Blob([payload], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'inkloom_audit_trail.json';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast('Downloaded immutable audit log (inkloom_audit_trail.json)', 'success');
+        });
+
+        // Analytics: Refine Guideline at Source Loop
+        document.getElementById('tab-analytics').addEventListener('click', e => {
+          const refineBtn = e.target.closest('[data-refine-id]');
+          if (!refineBtn) return;
+          const rcId = refineBtn.getAttribute('data-refine-id');
+          const insight = state.rootCauseInsights.find(i => i.id === rcId);
+          if (!insight || insight.resolved) return;
+
+          insight.resolved = true;
+          state.knowledgeBase.unshift({
+            id: 'rule-loop-' + rcId,
+            dimension: insight.proposedRule.dimension,
+            agent: 'Fact-Checking & RAG Agent',
+            severity: 'Warning',
+            trigger: insight.proposedRule.trigger,
+            replacement: insight.proposedRule.replacement,
+            sourceDoc: insight.proposedRule.sourceDoc,
+            sourcePage: insight.proposedRule.sourcePage,
+            similarity: '99.0%',
+            explanation: insight.proposedRule.explanation
+          });
+
+          addAuditLog('Refined ambiguous guideline at source (' + insight.proposedRule.sourceDoc + ') via Root-Cause Analytics');
+          renderAnalytics();
+          renderKnowledgeBase();
+          evaluateGovernance();
+          showToast('Rule patched in Stage 1 Knowledge Base! Closed-loop complete.', 'success');
+        });
+
+        // API Sandbox Controls
+        document.getElementById('apiEndpointSelect').addEventListener('change', renderApiSandbox);
+        document.getElementById('btnSendApiRequest').addEventListener('click', () => {
+          document.getElementById('apiResponseTiming').textContent = (240 + Math.floor(Math.random() * 90)) + 'ms • 200 OK';
+          renderApiSandbox();
+          showToast('Executed live API request against in-memory governance engine', 'success');
+        });
+
+        // Judge Walkthrough / Auto-Simulate Full Cycle
+        document.getElementById('btnCloseJudgeBanner').addEventListener('click', () => {
+          document.getElementById('judgeTourBanner').classList.add('hidden');
+        });
+
+        const runFullGuidedDemo = () => {
+          document.getElementById('judgeTourBanner').classList.remove('hidden');
+          switchTab('studio');
+          showToast('Step 1/3: Running parallel 4-agent check across all 5 dimensions...', 'info');
+          evaluateGovernance();
+          setTimeout(() => {
+            applyAllRewrites();
+            showToast('Step 2/3: Applied 1-Click Smart Rewrites & WCAG fixes (Score: 100%)!', 'success');
+          }, 1100);
+          setTimeout(() => {
+            state.workflowStageIndex = 4;
+            addAuditLog('Guided Judge Tour completed end-to-end sign-off cycle.');
+            renderAuditAndApproval();
+            showToast('Step 3/3: Workflow Approved! Inspect tabs 2, 3, 4 & 5 anytime.', 'success');
+          }, 2300);
+        };
+
+        document.getElementById('btnStartJudgeTour').addEventListener('click', runFullGuidedDemo);
+        document.getElementById('btnAutoDemoFix').addEventListener('click', runFullGuidedDemo);
+      });
+    })();
+  </script>
+</body>
+</html>
